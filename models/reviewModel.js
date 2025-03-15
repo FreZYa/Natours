@@ -1,6 +1,7 @@
 // review / rating / createdAt/ ref to tour / ref to user
 
 const mongoose = require('mongoose');
+const Tour = require('./tourModel');
 
 const reviewSchema = new mongoose.Schema({
     review: {
@@ -34,9 +35,6 @@ const reviewSchema = new mongoose.Schema({
     toObject: { virtuals: true },
 });
 
-// Add index for preventing duplicate reviews
-reviewSchema.index({ tour: 1, user: 1 }, { unique: true });
-
 // Add populate middleware
 reviewSchema.pre(/^find/, function(next) {
     this.populate({
@@ -48,6 +46,36 @@ reviewSchema.pre(/^find/, function(next) {
     });
     next();
 });
+
+reviewSchema.statics.calcAverageRatings = async function(tourId) {
+    const stats = await this.aggregate([
+        {
+            $match: { tour: tourId }
+        },
+        {
+            $group: {
+                _id: '$tour',
+                nRating: { $sum: 1 },
+                avgRating: { $avg: '$rating'}
+            }
+        }
+    ]);
+
+    await Tour.findByIdAndUpdate(tourId, {
+        ratingsQuantity: stats[0].nRating,
+        ratingsAverage: stats[0].avgRating
+    });
+};
+
+// 'save' yerine, 'save' sonrası çalışacak bir middleware
+reviewSchema.post('save', function() {
+    // this points to current review
+    this.constructor.calcAverageRatings(this.tour);
+});
+
+// Yorumlar silindiğinde veya güncellendiğinde de ortalamı güncelle
+// Veya benzersiz olmayan bir index kullanın
+reviewSchema.index({ tour: 1, user: 1 });
 
 const Review = mongoose.model('Review', reviewSchema);
 
