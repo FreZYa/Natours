@@ -3,15 +3,26 @@
   "version": "1.0.0",
   "description": "node, express and mongoDB",
   "main": "app.js",
+  "targets": {
+    "frontend": {
+      "source": "public/js/index.js",
+      "distDir": "public/js/bundled"
+    }
+  },
   "scripts": {
     "start": "nodemon server.js",
     "start:prod": "SET NODE_ENV=production && nodemon server.js",
-    "debug": "ndb server.js"
+    "debug": "ndb server.js",
+    "watch:js": "parcel watch --target frontend",
+    "build:js": "parcel build --target frontend"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "axios": "^1.9.0",
     "bcryptjs": "^2.4.3",
+    "cookie-parser": "^1.4.7",
+    "cors": "^2.8.5",
     "dotenv": "^16.4.5",
     "express": "^4.21.1",
     "express-mongo-sanitize": "^2.2.0",
@@ -28,6 +39,7 @@
     "xss-clean": "^0.1.4"
   },
   "devDependencies": {
+    "@parcel/optimizer-terser": "^2.15.1",
     "eslint": "^8.57.0",
     "eslint-config-airbnb": "^19.0.4",
     "eslint-config-prettier": "^9.1.0",
@@ -37,6 +49,7 @@
     "eslint-plugin-prettier": "^5.1.3",
     "eslint-plugin-react": "^7.33.2",
     "nodemon": "^3.0.3",
+    "parcel": "^2.15.1",
     "prettier": "^3.2.5"
   },
   "engines": {

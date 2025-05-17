@@ -1,14 +1,10 @@
-// Get the locations data from the DOM
-const locations = JSON.parse(document.getElementById('map').dataset.locations);
-console.log('Tour locations:', locations);
+/* eslint-disable */
+// import L from 'leaflet';
 
-// Fix Leaflet icon paths
-L.Icon.Default.imagePath = '/img/leaflet/';
+export const displayMap = locations => {
+  // Fix Leaflet icon paths
+  L.Icon.Default.imagePath = '/img/leaflet/';
 
-// Wait for DOM to be fully loaded
-document.addEventListener('DOMContentLoaded', function() {
-  if (!locations || locations.length === 0) return;
-  
   // Create map
   const map = L.map('map', {
     scrollWheelZoom: false
@@ -43,4 +39,4 @@ document.addEventListener('DOMContentLoaded', function() {
   map.fitBounds(bounds, {
     padding: [50, 50]
   });
-});
+}
