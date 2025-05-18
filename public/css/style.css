@@ -540,15 +540,28 @@ body {
 
 .section-map {
     position: relative;
-    height: 65rem;
-    margin-top: calc(0px - var(--section-rotate));
+    height: 65vh;
+    margin-top: 5rem;
+    margin-bottom: 5rem;
 }
 
 #map {
-    position: absolute;
-    top: 0;
-    bottom: 0;
+    height: 65vh;
     width: 100%;
+    position: relative;
+}
+
+/* Fix marker icon display */
+.leaflet-marker-icon, .leaflet-marker-shadow {
+    display: block;
+}
+
+/* Fix popup styling */
+.leaflet-popup-content {
+    font-size: 1.4rem;
+    font-weight: 400;
+    line-height: 1.7;
+    text-align: center;
 }
 
 .marker {
@@ -561,15 +574,6 @@ body {
 
 .mapboxgl-popup {
     max-width: 25rem;
-}
-
-.mapboxgl-popup-content {
-    text-align: center;
-    font-family: 'Lato', sans-serif;
-    padding: 1.5rem !important;
-    font-size: 1.4rem;
-    -webkit-box-shadow: 0 1rem 3rem rgba(0, 0, 0, 0.15) !important;
-    box-shadow: 0 1rem 3rem rgba(0, 0, 0, 0.15) !important;
 }
 
 .section-reviews {
@@ -1322,4 +1326,8 @@ body {
     box-shadow: 0 1rem 2rem rgba(0, 0, 0, 0.15);
     -webkit-transform: translateY(-2px);
     transform: translateY(-2px);
+}
+
+.leaflet-container {
+    font-family: 'Lato', sans-serif;
 }
