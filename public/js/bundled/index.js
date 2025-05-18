@@ -160,10 +160,10 @@
       });
     }
   }
-})({"e8rPL":[function(require,module,exports,__globalThis) {
+})({"6cCgj":[function(require,module,exports,__globalThis) {
 var HMR_HOST = null;
-var HMR_PORT = 60513;
-var HMR_SERVER_PORT = 60513;
+var HMR_PORT = 1234;
+var HMR_SERVER_PORT = 1234;
 var HMR_SECURE = false;
 var HMR_ENV_HASH = "b8e5beffa3b6ddc5";
 var HMR_USE_SSE = false;
@@ -666,14 +666,13 @@ function hmrAccept(bundle /*: ParcelRequire */ , id /*: string */ ) {
 }
 
 },{}],"4uyBp":[function(require,module,exports,__globalThis) {
-/* eslint-disable */ // Remove the import of leaflet - it should only be loaded in the browser
+// import '@babel/polyfill';
 var _login = require("./login");
 var _mapbox = require("./mapbox");
-var _alert = require("./alert");
-console.log('Hello World');
 // DOM ELEMENTS
 const mapBox = document.getElementById('map');
 const loginForm = document.querySelector('.form--login');
+const logoutBtn = document.querySelector('.nav__el--logout');
 // DELEGATION
 if (mapBox) {
     const locations = JSON.parse(mapBox.dataset.locations);
@@ -685,12 +684,17 @@ if (loginForm) loginForm.addEventListener('submit', (e)=>{
     const password = document.getElementById('password').value;
     (0, _login.login)(email, password);
 });
+if (logoutBtn) logoutBtn.addEventListener('click', (e)=>{
+    e.preventDefault();
+    (0, _login.logout)();
+});
 
-},{"./login":"qZEOz","./mapbox":"cr3Up","./alert":"bRZBd"}],"qZEOz":[function(require,module,exports,__globalThis) {
+},{"./login":"qZEOz","./mapbox":"cr3Up"}],"qZEOz":[function(require,module,exports,__globalThis) {
 /* eslint-disable */ // import axios from 'axios';
 var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
 parcelHelpers.defineInteropFlag(exports);
 parcelHelpers.export(exports, "login", ()=>login);
+parcelHelpers.export(exports, "logout", ()=>logout);
 var _alert = require("./alert");
 const login = async (email, password)=>{
     console.log(email, password);
@@ -715,14 +719,18 @@ const login = async (email, password)=>{
         (0, _alert.showAlert)('error', err.response.data.message);
     }
 };
-// DOM içeriklerini yalnızca form varsa çalıştır
-const loginForm = document.querySelector('.form');
-if (loginForm) loginForm.addEventListener('submit', (e)=>{
-    e.preventDefault();
-    const email = document.getElementById('email').value;
-    const password = document.getElementById('password').value;
-    login(email, password);
-});
+const logout = async ()=>{
+    try {
+        const res = await axios({
+            method: 'GET',
+            url: '/api/v1/users/logout',
+            withCredentials: true
+        });
+        if (res.data.status === 'success') location.reload(true);
+    } catch (err) {
+        (0, _alert.showAlert)('error', 'Error logging out! Try again later.');
+    }
+};
 
 },{"./alert":"bRZBd","@parcel/transformer-js/src/esmodule-helpers.js":"5Birt"}],"bRZBd":[function(require,module,exports,__globalThis) {
 /* eslint-disable */ var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
@@ -815,6 +823,6 @@ const displayMap = (locations)=>{
     });
 };
 
-},{"@parcel/transformer-js/src/esmodule-helpers.js":"5Birt"}]},["e8rPL","4uyBp"], "4uyBp", "parcelRequire11c7", {})
+},{"@parcel/transformer-js/src/esmodule-helpers.js":"5Birt"}]},["6cCgj","4uyBp"], "4uyBp", "parcelRequire11c7", {})
 
 //# sourceMappingURL=index.js.map

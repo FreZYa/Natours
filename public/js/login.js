@@ -27,14 +27,17 @@ export const login = async (email, password) => {
     }
 }
 
-// DOM içeriklerini yalnızca form varsa çalıştır
-const loginForm = document.querySelector('.form');
-if (loginForm) {
-    loginForm.addEventListener('submit', (e) => {
-        e.preventDefault();
-        const email = document.getElementById('email').value;
-        const password = document.getElementById('password').value;
-
-        login(email, password);
-    });
+export const logout = async () => {
+    try {
+        const res = await axios({
+            method: 'GET',
+            url: '/api/v1/users/logout',
+            withCredentials: true
+        })
+        if (res.data.status === 'success') {
+            location.reload(true);
+        }
+    } catch (err) {
+        showAlert('error', 'Error logging out! Try again later.')
+    }
 }
