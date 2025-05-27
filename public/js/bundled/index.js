@@ -670,12 +670,14 @@ function hmrAccept(bundle /*: ParcelRequire */ , id /*: string */ ) {
 var _login = require("./login");
 var _mapbox = require("./mapbox");
 var _updateSettings = require("./updateSettings");
+var _stripe = require("./stripe");
 // DOM ELEMENTS
 const mapBox = document.getElementById('map');
 const loginForm = document.querySelector('.form--login');
 const logoutBtn = document.querySelector('.nav__el--logout');
 const userDataForm = document.querySelector('.form-user-data');
 const userPasswordForm = document.querySelector('.form-user-password');
+const bookBtn = document.getElementById('book-tour');
 // DELEGATION
 if (mapBox) {
     const locations = JSON.parse(mapBox.dataset.locations);
@@ -716,8 +718,13 @@ if (userPasswordForm) userPasswordForm.addEventListener('submit', async (e)=>{
     document.getElementById('password-confirm').value = '';
     btn.textContent = 'Save password';
 });
+if (bookBtn) bookBtn.addEventListener('click', (e)=>{
+    e.target.textContent = 'Processing...';
+    const { tourId } = e.target.dataset;
+    (0, _stripe.bookTour)(tourId);
+});
 
-},{"./login":"qZEOz","./mapbox":"cr3Up","./updateSettings":"28JcJ"}],"qZEOz":[function(require,module,exports,__globalThis) {
+},{"./login":"qZEOz","./mapbox":"cr3Up","./updateSettings":"28JcJ","./stripe":"hu9K2"}],"qZEOz":[function(require,module,exports,__globalThis) {
 /* eslint-disable */ // import axios from 'axios';
 var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
 parcelHelpers.defineInteropFlag(exports);
@@ -877,6 +884,24 @@ const updateSettings = async (data, type)=>{
     }
 };
 
-},{"./alert":"bRZBd","@parcel/transformer-js/src/esmodule-helpers.js":"5Birt"}]},["6cCgj","4uyBp"], "4uyBp", "parcelRequire11c7", {})
+},{"./alert":"bRZBd","@parcel/transformer-js/src/esmodule-helpers.js":"5Birt"}],"hu9K2":[function(require,module,exports,__globalThis) {
+var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
+parcelHelpers.defineInteropFlag(exports);
+parcelHelpers.export(exports, "bookTour", ()=>bookTour);
+const stripe = Stripe('pk_test_51RT4wXK51ANe3rhNX0aVAKNwHLQ3xcG7MaFWbY2Z1vToJFSb3DyFjBHXhvjWOV2KLLqp5LE6DckiXKoUJo7sjYGL00yM1vkmAp');
+const bookTour = async (tourId)=>{
+    try {
+        const session = await axios(`http://127.0.0.1:3000/api/v1/bookings/checkout-session/${tourId}`);
+        console.log(session);
+        await stripe.redirectToCheckout({
+            sessionId: session.data.session.id
+        });
+    } catch (error) {
+        console.log(error);
+        showAlert('error', error);
+    }
+};
+
+},{"@parcel/transformer-js/src/esmodule-helpers.js":"5Birt"}]},["6cCgj","4uyBp"], "4uyBp", "parcelRequire11c7", {})
 
 //# sourceMappingURL=index.js.map

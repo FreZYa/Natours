@@ -73,14 +73,14 @@ exports.getAll = (Model) => catchAsync(async (req, res, next) => {
         .paginate();
 
     // Execute the query
-    const docs = await features.query;
+    const data = await features.query;
 
     // Send response
     res.status(200).json({
         status: 'success',
-        results: docs.length,
+        results: data.length,
         data: {
-            docs,
+            data,
         }
     });
 });
