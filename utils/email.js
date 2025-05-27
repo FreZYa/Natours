@@ -11,9 +11,7 @@ module.exports = class Email {
     }
 
     newTransport() {
-        console.log("process.env.NODE_ENV", process.env.NODE_ENV);
         if (process.env.NODE_ENV === 'production') {
-            console.log("sending mail to", this.to);
             // Sendgrid
             return nodemailer.createTransport({
                 service: 'SendGrid',
@@ -52,16 +50,13 @@ module.exports = class Email {
                 text: htmlToText.convert(html)
             };
 
-            console.log(`Attempting to send ${template} email to ${this.to}`);
             
             // 3) Create a transport and send email
             const transport = this.newTransport();
             // Set timeout to avoid hanging connections
             const result = await transport.sendMail(mailOptions);
-            console.log(`Email sent successfully: ${result.messageId}`);
             return result;
         } catch (error) {
-            console.error('Error sending email:', error);
             throw new Error(`Could not send ${template} email: ${error.message}`);
         }
     }

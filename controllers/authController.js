@@ -41,12 +41,9 @@ const createSendToken = (user, statusCode, res) => {
     })
 }
 
-exports.signup = catchAsync(async (req, res, next) => {
-    console.log('Signup request received:', req.body.email);
-    
+exports.signup = catchAsync(async (req, res, next) => {    
     // Check if user with this email already exists
     const existingUser = await User.findOne({ email: req.body.email });
-    console.log('existingUser', existingUser);
     if (existingUser) {
         return next(new AppError('Email already in use. Please use a different email address.', 400));
     }
@@ -59,15 +56,8 @@ exports.signup = catchAsync(async (req, res, next) => {
         role: req.body.role
     });
     const url = `${req.protocol}://${req.get('host')}/me`;
-    console.log("url", url);
-    
-    try {
-        await new Email(newUser, url).sendWelcome();
-        console.log('Email sent successfully');
-    } catch (err) {
-        console.error('Error sending email:', err);
-        // Continue with signup even if email fails
-    }
+
+    await new Email(newUser, url).sendWelcome();
     
     // Always return a response to avoid hanging requests
     return createSendToken(newUser, 201, res);
