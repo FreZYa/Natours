@@ -4,28 +4,25 @@ const jwt = require('jsonwebtoken');
 const User = require('./../models/userModel');
 const catchAsync = require('./../utils/catchAsync');
 const AppError = require('./../utils/appError');
-const sendEmail = require('./../utils/email');
+const Email = require('./../utils/email');
+
 const signToken = id => {
     return jwt.sign({ id }, process.env.JWT_SECRET, {
         expiresIn: process.env.JWT_EXPIRES_IN
     });
 };
 
-const createSendToken = (user, statusCode, res) => {
+const createSendToken = (user, statusCode, req, res) => {
     const token = signToken(user._id);
 
-    const cookieOptions = {
+    res.cookie('jwt', token, {
         expires: new Date(
             Date.now() + process.env.JWT_COOKIE_EXPIRES_IN * 24 * 60 * 60 * 1000
         ),
         httpOnly: true,
-        sameSite: 'lax'  // Farklı domainler arası cookie gönderimi için
-    }
-
-    // HTTPS bağlantısı varsa secure özelliğini aktif et
-    if (process.env.NODE_ENV === 'production') cookieOptions.secure = true;
-
-    res.cookie('jwt', token, cookieOptions);
+        sameSite: 'lax',  // Farklı domainler arası cookie gönderimi için
+        secure: req.secure || req.headers['x-forwarded-proto'] === 'https'
+    }); 
 
     // Remove password from output
     user.password = undefined;
@@ -40,17 +37,26 @@ const createSendToken = (user, statusCode, res) => {
     })
 }
 
-exports.signup = catchAsync(async (req, res, next) => {
-
+exports.signup = catchAsync(async (req, res, next) => {    
+    // Check if user with this email already exists
+    const existingUser = await User.findOne({ email: req.body.email });
+    if (existingUser) {
+        return next(new AppError('Email already in use. Please use a different email address.', 400));
+    }
+    
     const newUser = await User.create({
         name: req.body.name,
         email: req.body.email,
         password: req.body.password,
         passwordConfirm: req.body.passwordConfirm,
         role: req.body.role
-
     });
-    createSendToken(newUser, 201, res);
+    const url = `${req.protocol}://${req.get('host')}/me`;
+
+    await new Email(newUser, url).sendWelcome();
+    
+    // Always return a response to avoid hanging requests
+    return createSendToken(newUser, 201, req, res);
 });
 
 exports.login = catchAsync(async (req, res, next) => {
@@ -70,7 +76,7 @@ exports.login = catchAsync(async (req, res, next) => {
         return next(new AppError('Incorrect email or password', 401));
     }
 
-    createSendToken(user, 200, res);
+    createSendToken(user, 200, req, res);
 });
 
 
@@ -175,17 +181,10 @@ exports.forgotPassword = catchAsync(async (req, res, next) => {
     await user.save({validateBeforeSave: false});
     
     // 3) Send it to user's email
-    const resetURL = `${req.protocol}://${req.get('host')}/api/v1/users/resetPassword/${resetToken}`;
-
-    const message = `Forgot your password? Submit a PATCH request with your new password and passwordConfirm to: ${resetURL}.\nIf you didn't forget your password, please ignore this email!`;
-
-
     try {
-        await sendEmail({
-            email: user.email,
-            subject: 'Your password reset token (valid for only 10 minutes)',
-            message
-        })
+        const resetURL = `${req.protocol}://${req.get('host')}/api/v1/users/resetPassword/${resetToken}`;
+
+        await new Email(user, resetURL).sendPasswordReset();
         res.status(200).json({
             status: 'success',
             message: 'Token sent to email!'
@@ -236,6 +235,6 @@ exports.updatePassword = catchAsync(async (req, res, next) => {
 
     await user.save();
 
-    createSendToken(user, 200, res);
+    createSendToken(user, 200, req, res);
     
 })

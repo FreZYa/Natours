@@ -1,5 +1,9 @@
 const mongoose = require('mongoose');
 const dotenv = require('dotenv');
+
+// Load env variables before requiring app.js
+dotenv.config({ path: './config.env' });
+
 const app = require('./app');
 
 process.on('uncaughtException', err => {
@@ -7,8 +11,6 @@ process.on('uncaughtException', err => {
     console.log(err.name, err.message);
     process.exit(1);
 });
-
-dotenv.config({ path: './config.env' });
 
 const DB = process.env.DATABASE.replace(
     '<PASSWORD>',
@@ -30,6 +32,11 @@ process.on('unhandledRejection', err => {
     server.close(() => {
         process.exit(1);
     });
-});
+})
 
-// TEST
+process.on('SIGTERM', () => {
+    console.log('👋 SIGTERM received. Shutting down gracefully...');
+    server.close(() => {
+        console.log(' 💥 Process terminated!');
+    });
+});

@@ -1,14 +1,12 @@
 const AppError = require('./../utils/appError');
 
 const handleCastErrorDB = err => {
-    console.log("err", err)
     const message = `Invalid ${err.path}: ${err.value}.`;
     return new AppError(message, 400);
 }
 
 const handleDuplicateFieldsDB = err => {
     const value = err.errmsg.match(/(["'])(?:\\.|[^\\])*?\1/)[0];
-    console.log(value)
     const message = `Duplicate field value: ${value}. Please use another value!`
 
     return new AppError(message, 400);
@@ -36,6 +34,7 @@ const sendErrorDev = (err, req, res) => {
         });
     } 
     // B) RENDERED WEBSITE - render error page with message
+    console.error('ERROR 💥', err);
     return res.status(err.statusCode).render('error', {
         title: 'Something went wrong!',
         msg: err.message
